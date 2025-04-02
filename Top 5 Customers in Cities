@@ -1,0 +1,27 @@
+-- top 5 customers in cities
+SELECT 
+    Customer.customer_id AS CustomerID, 
+    Customer.first_name AS FirstName, 
+    Customer.last_name AS LastName, 
+    Country.country AS Country, 
+    City.city AS City, 
+    SUM(Payment.amount) AS TotalAmountPaid
+FROM customer Customer
+INNER JOIN address Address ON Customer.address_id = Address.address_id
+INNER JOIN city City ON Address.city_id = City.city_id
+INNER JOIN country Country ON City.country_id = Country.country_id
+INNER JOIN payment Payment ON Customer.customer_id = Payment.customer_id
+WHERE 
+    City.city IN (
+        SELECT City.city 
+        FROM customer Cust
+        INNER JOIN address Addr ON Cust.address_id = Addr.address_id
+        INNER JOIN city  ON Addr.city_id = city.city_id
+        GROUP BY city.city
+        ORDER BY COUNT(Cust.customer_id) DESC
+        LIMIT 10
+    )
+GROUP BY  Customer.customer_id, Customer.first_name, Customer.last_name, Country.country, City.city
+ORDER BY TotalAmountPaid DESC
+LIMIT 5;
+
